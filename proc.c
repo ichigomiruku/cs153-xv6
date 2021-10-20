@@ -223,7 +223,7 @@ fork(void)
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
+// until its parent calls waitS(0) to find out it exited.
 void
 exit(void)
 {
@@ -249,7 +249,7 @@ exit(void)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in waitS(0).
   wakeup1(curproc->parent);
 
   // Pass abandoned children to init.
@@ -295,7 +295,7 @@ exitS(int status)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in waitS(0).
   wakeup1(curproc->parent);
 
   // Pass abandoned children to init.
@@ -409,18 +409,23 @@ waitpid(int pid, int *status, int options)
   struct proc *p;
   struct proc *curproc = myproc();
   int exist;
+  int npid;
   exist = 0;
+
 
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for exited children.
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pid != pid)
-        continue;
+      // *status = p->status;
+
+      // if(p->pid != pid)
+      //   continue;
+      if(p->parent != curproc) continue;
       exist = 1;
       if(p->state == ZOMBIE){
         // Found one.
-        pid = p->pid;
+        npid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -431,7 +436,10 @@ waitpid(int pid, int *status, int options)
         p->state = UNUSED;
         release(&ptable.lock);
         *status = p->status;
-        return pid;
+        // if(status){
+        //   *status = p->status;
+        // }
+        return npid;
       }
     }
 

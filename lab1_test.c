@@ -47,7 +47,7 @@ int exitWait(void) {
       exitS(-1);
   } 
     } else if (pid > 0) { // only the parent executes this code
-      ret_pid = waitS(&exit_status);    // originally wait()
+      ret_pid = waitS(&exit_status);
       printf(1, "\n This is the parent: child with PID# %d has exited with status %d\n", ret_pid, exit_status);
     } else  // something went wrong with fork system call
     {  
@@ -74,8 +74,7 @@ int waitPid(void){
 			exitS(getpid() + 4);
 		}
 	}
-       
-      sleep(5);
+      sleep(15);    // some text gets garbled if sleep(5)? cant seem to fix...
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[3]);
       ret_pid = waitpid(pid_a[3], &exit_status, 0);
       printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
@@ -117,7 +116,7 @@ int CELEBW02(void){
   }
   else do {
     if ((retpid = waitpid(pid, &status, WNOHANG)) == -1)
-      printf(2, "wait() error");
+      printf(2, "waitS(0) error");
     else if (retpid == 0) {
       printf(1, "child is still running \n");
       sleep(1);
