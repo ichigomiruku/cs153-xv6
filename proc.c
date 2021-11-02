@@ -355,6 +355,7 @@ scheduler(void)
       c->proc = highestPriority;
       switchuvm(highestPriority);
       highestPriority->state = RUNNING;
+      highestPriority->priority --;
 
       swtch(&(c->scheduler), highestPriority->context);
       switchkvm();
