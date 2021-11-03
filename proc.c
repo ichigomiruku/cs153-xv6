@@ -319,10 +319,13 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+
+//lab2
 void
 scheduler(void)
 {
   struct proc *p;
+  struct proc* highestPriority;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -332,18 +335,29 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    highestPriority = ptable.proc;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      if(p->state != RUNNABLE || p->priority < highestPriority->priority){
+        if(p->state == RUNNABLE){
+          if(p->priority < 25){
+            p->priority ++;
+          }
+        }
         continue;
+      }
 
+      if(p->priority >= highestPriority -> priority){
+        highestPriority = p;
+      }
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+      c->proc = highestPriority;
+      switchuvm(highestPriority);
+      highestPriority->state = RUNNING;
+      highestPriority->priority --;
 
-      swtch(&(c->scheduler), p->context);
+      swtch(&(c->scheduler), highestPriority->context);
       switchkvm();
 
       // Process is done running for now.
@@ -353,6 +367,21 @@ scheduler(void)
     release(&ptable.lock);
 
   }
+}
+
+
+//lab2
+int
+setPriority(int tempPriority)
+{
+  if (tempPriority < 0 || tempPriority >25){
+    return -1;
+  }
+  struct proc* curproc = myproc();
+  acquire(&ptable.lock);
+  curproc->priority = tempPriority;
+  release(&ptable.lock);
+  return 0;
 }
 
 // Enter scheduler.  Must hold only ptable.lock
