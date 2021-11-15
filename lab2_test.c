@@ -27,6 +27,7 @@ int PScheduler(void)
     printf(1, "\n  Step 2: The parent processes will switch to priority 0\n");
     setPriority(0);
     for (i = 0; i <  3; i++) {
+	// for(i = 2; i > -1; i--){
 		pid = fork();
 		if (pid > 0)
 		{

@@ -337,24 +337,30 @@ scheduler(void)
     acquire(&ptable.lock);
     highestPriority = ptable.proc;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE || p->priority < highestPriority->priority){
-        if(p->state == RUNNABLE){
-          if(p->priority < 25){
-            p->priority ++;
-          }
-        }
+      if(p->state != RUNNABLE)
         continue;
+      highestPriority = p;
+
+      struct proc *i;
+      // i = p or p + 1? does cur proc matter?
+      for(i = p; i < &ptable.proc[NPROC]; i++){
+        if(i->state != RUNNABLE){
+          continue;
+        }
+        if(i->priority < p->priority){
+          highestPriority = i;
+        }
       }
 
-      if(p->priority >= highestPriority -> priority){
-        highestPriority = p;
-      }
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = highestPriority;
       switchuvm(highestPriority);
       highestPriority->state = RUNNING;
+
+      // why do we increase here? (0 is highest)
       highestPriority->priority --;
 
       swtch(&(c->scheduler), highestPriority->context);
@@ -374,9 +380,16 @@ scheduler(void)
 int
 setPriority(int tempPriority)
 {
-  if (tempPriority < 0 || tempPriority >25){
-    return -1;
+  // if (tempPriority < 0 || tempPriority >25){
+  //   return -1;
+  // }
+  if(tempPriority < 0){
+    tempPriority = 0;
   }
+  if(tempPriority > 35){
+    tempPriority = 35;
+  }
+  
   struct proc* curproc = myproc();
   acquire(&ptable.lock);
   curproc->priority = tempPriority;
