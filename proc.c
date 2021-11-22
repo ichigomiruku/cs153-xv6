@@ -361,7 +361,7 @@ scheduler(void)
       highestPriority->state = RUNNING;
 
       // why do we increase here? (0 is highest)
-      highestPriority->priority --;
+      // highestPriority->priority --;
 
       swtch(&(c->scheduler), highestPriority->context);
       switchkvm();
