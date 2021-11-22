@@ -196,10 +196,13 @@ fork(void)
     np->state = UNUSED;
     return -1;
   }
+  // Lab 3
+  np->stackPages = curproc->stackPages;
+  
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
-
+  
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
