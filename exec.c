@@ -68,7 +68,6 @@ exec(char *path, char **argv)
   // if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
   //   goto bad;
   // clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
-  // if(allocuvm(pgdir, KERNBASE - 2*PGSIZE, KERNBASE - 4) == 0)
   if((sp = allocuvm(pgdir, STACKTOP - PGSIZE, STACKTOP)) == 0)
     goto bad;
   // sp = sz;
